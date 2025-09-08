@@ -5,19 +5,22 @@ const scenes = window.SCENES || {};
 const buttonsContainer = document.getElementById('scene-buttons');
 
 function buildButtons() {
-  Object.entries(scenes).forEach(([key, scene]) => {
-    const b = document.createElement('button');
-    b.className = 'px-5 py-2.5 bg-gray-700 text-white text-sm font-semibold rounded-full shadow-md hover:bg-gray-600 transition-all';
-    b.textContent = scene.title;
-    b.addEventListener('click', () => loadScene(key, b));
-    buttonsContainer.appendChild(b);
-  });
-}
+    Object.entries(scenes).forEach(([key, scene]) => {
+      const b = document.createElement('button');
+      b.className = 'px-5 py-2.5 bg-black/40 text-white text-sm font-semibold rounded-full shadow hover:bg-black/60 transition-colors';
+      b.textContent = scene.title;
+      b.addEventListener('click', () => loadScene(key, b));
+      buttonsContainer.appendChild(b);
+    });
+  }
 
 function loadScene(key, btnEl) {
   const container = document.getElementById('panorama-viewer');
-  // clear active state
-  Array.from(buttonsContainer.children).forEach(el => el.classList.remove('ring-2','ring-gray-400'));
+    // clear active state
+    Array.from(buttonsContainer.children).forEach(el => {
+      el.classList.remove('bg-red-600','hover:bg-red-700');
+      el.classList.add('bg-black/40','hover:bg-black/60');
+    });
 
   // destroy old viewer
   if (currentViewer) {
@@ -32,7 +35,8 @@ function loadScene(key, btnEl) {
     return;
   }
 
-  btnEl?.classList.add('ring-2','ring-gray-400');
+    btnEl?.classList.remove('bg-black/40','hover:bg-black/60');
+    btnEl?.classList.add('bg-red-600','hover:bg-red-700');
 
   try {
     currentViewer = pannellum.viewer('panorama-viewer', {
