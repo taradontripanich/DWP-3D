@@ -1,11 +1,11 @@
 window.SCENES = {
   livdin: {
-    title: "4 Bedroom Living & Dining",
+    title: "Living & Dining",
     url: "https://i.postimg.cc/gmKG3fyk/VR-copy-done.jpg",
     hotspots: []
   },
   msbed: {
-    title: "4 Bedroom Master Bedroom",
+    title: "Master Bedroom",
     url: "https://i.postimg.cc/Sqv6kvYR/18-0036-4-BR-VR-MODERN-00-31-done.jpg",
     hotspots: []
   },
