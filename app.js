@@ -4,6 +4,12 @@ let autoRotateOn = true;
 const scenes = window.SCENES || {};
 const buttonsContainer = document.getElementById('scene-buttons');
 const buttonMap = {};
+const floorplanPin = document.getElementById('fp-pin');
+
+const floorplanPositions = {
+  livdin: { left: '60%', top: '40%' },
+  msbed: { left: '15%', top: '20%' }
+};
 
 function buildButtons() {
   Object.entries(scenes).forEach(([key, scene]) => {
@@ -54,6 +60,21 @@ function loadScene(key, btnEl) {
   } catch (e) {
     container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to initialize viewer.</div>';
   }
+
+  updateFloorplanPin(key);
+}
+
+function updateFloorplanPin(sceneKey) {
+  if (!floorplanPin) return;
+  const pos = floorplanPositions[sceneKey];
+  if (!pos) {
+    floorplanPin.style.display = 'none';
+    return;
+  }
+  floorplanPin.style.display = 'block';
+  floorplanPin.style.left = pos.left;
+  floorplanPin.style.top = pos.top;
+  floorplanPin.title = scenes[sceneKey]?.title || '';
 }
 
 function setupControls() {
@@ -83,10 +104,6 @@ window.addEventListener('DOMContentLoaded', () => {
   const firstKey = Object.keys(scenes)[0];
   const firstBtn = buttonsContainer.children[0];
   if (firstKey) loadScene(firstKey, firstBtn);
-
-  document.getElementById('fp-pin-livdin')?.addEventListener('click', () => {
-    loadScene('livdin', buttonMap['livdin']);
-  });
 
   const btnFloorplan = document.getElementById('btn-floorplan');
   const fp = document.getElementById('floorplan');
