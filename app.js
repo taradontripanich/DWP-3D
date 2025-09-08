@@ -110,6 +110,8 @@ window.addEventListener('DOMContentLoaded', () => {
 
   const btnFloorplan = document.getElementById('btn-floorplan');
   const fp = document.getElementById('floorplan');
+  const controls = document.getElementById('viewer-controls');
+
   btnFloorplan?.addEventListener('click', () => {
     if (!fp || !btnFloorplan) return;
     floorplanVisible = !floorplanVisible;
@@ -123,10 +125,12 @@ window.addEventListener('DOMContentLoaded', () => {
     if (small) {
       fp.classList.add('hidden');
       btnFloorplan.classList.add('hidden');
+      controls?.classList.add('hidden');
     } else {
       btnFloorplan.classList.remove('hidden');
       fp.classList.toggle('hidden', !floorplanVisible);
       btnFloorplan.textContent = floorplanVisible ? 'Hide Map' : 'Show Map';
+      controls?.classList.remove('hidden');
     }
   }
 
