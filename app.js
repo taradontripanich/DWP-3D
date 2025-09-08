@@ -8,7 +8,8 @@ const floorplanPin = document.getElementById('fp-pin');
 
 const floorplanPositions = {
   livdin: { left: '60%', top: '40%' },
-  msbed: { left: '15%', top: '20%' }
+  msbed: { left: '15%', top: '20%' },
+  walkin: { left: '18%', top: '35%' }
 };
 
 function buildButtons() {
