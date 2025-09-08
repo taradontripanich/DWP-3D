@@ -87,4 +87,9 @@ window.addEventListener('DOMContentLoaded', () => {
   document.getElementById('fp-pin-livdin')?.addEventListener('click', () => {
     loadScene('livdin', buttonMap['livdin']);
   });
+
+  document.getElementById('btn-floorplan')?.addEventListener('click', () => {
+    const fp = document.getElementById('floorplan');
+    fp?.classList.toggle('hidden');
+  });
 });
