@@ -88,8 +88,11 @@ window.addEventListener('DOMContentLoaded', () => {
     loadScene('livdin', buttonMap['livdin']);
   });
 
-  document.getElementById('btn-floorplan')?.addEventListener('click', () => {
-    const fp = document.getElementById('floorplan');
-    fp?.classList.toggle('hidden');
+  const btnFloorplan = document.getElementById('btn-floorplan');
+  const fp = document.getElementById('floorplan');
+  btnFloorplan?.addEventListener('click', () => {
+    if (!fp || !btnFloorplan) return;
+    const isHidden = fp.classList.toggle('hidden');
+    btnFloorplan.textContent = isHidden ? 'Show Map' : 'Hide Map';
   });
 });
