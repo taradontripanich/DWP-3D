@@ -5,10 +5,11 @@ const scenes = window.SCENES || {};
 const buttonsContainer = document.getElementById('scene-buttons');
 
 function buildButtons() {
-    Object.entries(scenes).forEach(([key, scene]) => {
+    Object.entries(scenes).forEach(([key, scene], idx) => {
       const b = document.createElement('button');
-      b.className = 'px-5 py-2.5 bg-black/40 text-white text-sm font-semibold rounded-full shadow hover:bg-black/60 transition-colors';
-      b.textContent = scene.title;
+      b.className = 'w-10 h-10 flex items-center justify-center bg-black/40 text-white text-sm font-semibold shadow hover:bg-black/60 transition-colors';
+      b.textContent = idx + 1;
+      b.title = scene.title;
       b.addEventListener('click', () => loadScene(key, b));
       buttonsContainer.appendChild(b);
     });
