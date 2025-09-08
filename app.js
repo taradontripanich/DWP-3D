@@ -32,7 +32,6 @@ function loadScene(key, btnEl) {
   const scene = scenes[key];
   if (!scene) {
     container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Scene not found.</div>';
-    document.getElementById('scene-title').textContent = '';
     return;
   }
 
@@ -47,14 +46,11 @@ function loadScene(key, btnEl) {
       autoRotate: autoRotateOn ? -2 : 0,
       hotSpots: scene.hotspots || []
     });
-    document.getElementById('scene-title').textContent = scene.title;
     currentViewer.on('error', () => {
       container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to load scene.</div>';
-      document.getElementById('scene-title').textContent = '';
     });
   } catch (e) {
     container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to initialize viewer.</div>';
-    document.getElementById('scene-title').textContent = '';
   }
 }
 
