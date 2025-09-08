@@ -1,5 +1,6 @@
 let currentViewer = null;
 let autoRotateOn = true;
+let floorplanVisible = true;
 
 const scenes = window.SCENES || {};
 const buttonsContainer = document.getElementById('scene-buttons');
@@ -111,7 +112,24 @@ window.addEventListener('DOMContentLoaded', () => {
   const fp = document.getElementById('floorplan');
   btnFloorplan?.addEventListener('click', () => {
     if (!fp || !btnFloorplan) return;
-    const isHidden = fp.classList.toggle('hidden');
-    btnFloorplan.textContent = isHidden ? 'Show Map' : 'Hide Map';
+    floorplanVisible = !floorplanVisible;
+    fp.classList.toggle('hidden', !floorplanVisible);
+    btnFloorplan.textContent = floorplanVisible ? 'Hide Map' : 'Show Map';
   });
+
+  function handleResize() {
+    if (!fp || !btnFloorplan) return;
+    const small = window.innerWidth < 768;
+    if (small) {
+      fp.classList.add('hidden');
+      btnFloorplan.classList.add('hidden');
+    } else {
+      btnFloorplan.classList.remove('hidden');
+      fp.classList.toggle('hidden', !floorplanVisible);
+      btnFloorplan.textContent = floorplanVisible ? 'Hide Map' : 'Show Map';
+    }
+  }
+
+  handleResize();
+  window.addEventListener('resize', handleResize);
 });
