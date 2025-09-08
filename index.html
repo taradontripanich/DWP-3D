@@ -14,19 +14,7 @@
       overflow: hidden;
     }
     .pnlm-title-box {
-      bottom: 1rem !important;
-      top: auto !important;
-      right: 1rem !important;
-      left: auto !important;
-      text-align: right !important;
-      padding: 0.25rem 0.5rem !important;
-      background: rgba(0, 0, 0, 0.5) !important;
-      box-shadow: none !important;
-      border-radius: 0.25rem;
-    }
-    .pnlm-title-box .pnlm-title {
-      color: rgba(255,255,255,0.85) !important;
-      background: transparent !important;
+      display: none !important;
     }
   </style>
 </head>
@@ -39,6 +27,8 @@
     </header>
 
     <nav id="scene-buttons" class="absolute top-4 right-4 flex z-10 border border-white/20 divide-x divide-white/20 bg-black/40"></nav>
+
+    <div id="scene-title" class="absolute bottom-4 right-4 bg-black/50 text-white px-2 py-1 rounded text-sm z-10"></div>
 
     <div class="absolute bottom-16 left-1/2 -translate-x-1/2 flex items-center justify-center gap-3 z-10">
       <button id="btn-rotate" class="px-4 py-2 bg-gray-800 text-white rounded-full">Auto-Rotate</button>
