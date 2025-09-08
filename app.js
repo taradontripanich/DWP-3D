@@ -3,6 +3,7 @@ let autoRotateOn = true;
 
 const scenes = window.SCENES || {};
 const buttonsContainer = document.getElementById('scene-buttons');
+const buttonMap = {};
 
 function buildButtons() {
   Object.entries(scenes).forEach(([key, scene]) => {
@@ -11,6 +12,7 @@ function buildButtons() {
     b.textContent = scene.title;
     b.addEventListener('click', () => loadScene(key, b));
     buttonsContainer.appendChild(b);
+    buttonMap[key] = b;
   });
 }
 
@@ -81,4 +83,8 @@ window.addEventListener('DOMContentLoaded', () => {
   const firstKey = Object.keys(scenes)[0];
   const firstBtn = buttonsContainer.children[0];
   if (firstKey) loadScene(firstKey, firstBtn);
+
+  document.getElementById('fp-pin-livdin')?.addEventListener('click', () => {
+    loadScene('livdin', buttonMap['livdin']);
+  });
 });
