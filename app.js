@@ -7,7 +7,7 @@ const buttonMap = {};
 const floorplanPin = document.getElementById('fp-pin');
 
 const floorplanPositions = {
-  livdin: { left: '60%', top: '40%' },
+  livdin: { left: '75%', top: '35%' },
   msbed: { left: '15%', top: '20%' },
   walkin: { left: '22%', top: '27%' },
   bedroom2: { left: '15%', top: '75%' }
