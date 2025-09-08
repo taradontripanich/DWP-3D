@@ -7,7 +7,7 @@ const buttonsContainer = document.getElementById('scene-buttons');
 function buildButtons() {
   Object.entries(scenes).forEach(([key, scene]) => {
     const b = document.createElement('button');
-    b.className = 'px-4 py-2 bg-black/40 text-white text-sm font-semibold rounded-full shadow hover:bg-black/60 transition-colors';
+    b.className = 'px-4 py-2 text-white text-sm font-semibold hover:bg-black/60 transition-colors whitespace-nowrap';
     b.textContent = scene.title;
     b.addEventListener('click', () => loadScene(key, b));
     buttonsContainer.appendChild(b);
@@ -18,8 +18,8 @@ function loadScene(key, btnEl) {
   const container = document.getElementById('panorama-viewer');
     // clear active state
     Array.from(buttonsContainer.children).forEach(el => {
-      el.classList.remove('bg-red-600','hover:bg-red-700');
-      el.classList.add('bg-black/40','hover:bg-black/60');
+      el.classList.remove('bg-red-600','hover:bg-red-700','bg-red-700','hover:bg-red-800');
+      el.classList.add('hover:bg-black/60');
     });
 
   // destroy old viewer
@@ -35,8 +35,8 @@ function loadScene(key, btnEl) {
     return;
   }
 
-    btnEl?.classList.remove('bg-black/40','hover:bg-black/60');
-    btnEl?.classList.add('bg-red-600','hover:bg-red-700');
+    btnEl?.classList.remove('hover:bg-black/60');
+    btnEl?.classList.add('bg-red-700','hover:bg-red-800');
 
   try {
     currentViewer = pannellum.viewer('panorama-viewer', {
