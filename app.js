@@ -8,30 +8,79 @@ const buttonMap = {};
 const floorplanPin = document.getElementById('fp-pin');
 
 const floorplanPositions = {
-  livdin: { left: '75%', top: '35%' },
-  msbed: { left: '16%', top: '20%' },
-  walkin: { left: '10%', top: '40%' },
+  livdin_v1: { left: '75%', top: '35%' },
+  livdin_v2: { left: '75%', top: '35%' },
+  livdin_v3: { left: '75%', top: '35%' },
+  msbed_v1: { left: '16%', top: '20%' },
+  msbed_v2: { left: '16%', top: '20%' },
+  msbed_v3: { left: '10%', top: '40%' },
+  msbed_v4: { left: '10%', top: '40%' },
   bedroom2: { left: '18%', top: '75%' }
 };
 
 function buildButtons() {
+  const groups = {};
   Object.entries(scenes).forEach(([key, scene]) => {
-    const b = document.createElement('button');
-    b.className = 'px-4 py-2 text-white text-sm font-semibold hover:bg-black/60 transition-colors whitespace-nowrap';
-    b.textContent = scene.title;
-    b.addEventListener('click', () => loadScene(key, b));
-    buttonsContainer.appendChild(b);
-    buttonMap[key] = b;
+    const g = scene.group || 'Other';
+    if (!groups[g]) groups[g] = [];
+    groups[g].push({ key, title: scene.title });
+  });
+
+  Object.entries(groups).forEach(([groupName, views]) => {
+    if (views.length === 1) {
+      const { key } = views[0];
+      const b = document.createElement('button');
+      b.className = 'px-4 py-2 text-white text-sm font-semibold hover:bg-black/60 transition-colors whitespace-nowrap';
+      b.textContent = groupName;
+      b.addEventListener('click', () => loadScene(key, b));
+      buttonsContainer.appendChild(b);
+      buttonMap[key] = b;
+    } else {
+      const wrapper = document.createElement('div');
+      wrapper.className = 'relative';
+
+      const mainBtn = document.createElement('button');
+      mainBtn.className = 'px-4 py-2 text-white text-sm font-semibold hover:bg-black/60 transition-colors whitespace-nowrap';
+      mainBtn.textContent = groupName;
+      wrapper.appendChild(mainBtn);
+
+      const dd = document.createElement('div');
+      dd.className = 'hidden absolute right-0 mt-1 flex flex-col bg-black/80';
+
+      views.forEach(({ key, title }) => {
+        const item = document.createElement('button');
+        item.className = 'px-4 py-2 text-white text-sm hover:bg-black/60 whitespace-nowrap text-left';
+        item.textContent = title;
+        item.addEventListener('click', (e) => {
+          e.stopPropagation();
+          dd.classList.add('hidden');
+          loadScene(key, item);
+        });
+        dd.appendChild(item);
+        buttonMap[key] = item;
+      });
+
+      wrapper.appendChild(dd);
+
+      mainBtn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        dd.classList.toggle('hidden');
+      });
+
+      document.addEventListener('click', () => dd.classList.add('hidden'));
+
+      buttonsContainer.appendChild(wrapper);
+    }
   });
 }
 
 function loadScene(key, btnEl) {
   const container = document.getElementById('panorama-viewer');
-    // clear active state
-    Array.from(buttonsContainer.children).forEach(el => {
-      el.classList.remove('bg-red-600','hover:bg-red-700','bg-red-700','hover:bg-red-800');
-      el.classList.add('hover:bg-black/60');
-    });
+  // clear active state
+  Object.values(buttonMap).forEach(el => {
+    el.classList.remove('bg-red-600','hover:bg-red-700','bg-red-700','hover:bg-red-800');
+    el.classList.add('hover:bg-black/60');
+  });
 
   // destroy old viewer
   if (currentViewer) {
@@ -46,8 +95,8 @@ function loadScene(key, btnEl) {
     return;
   }
 
-    btnEl?.classList.remove('hover:bg-black/60');
-    btnEl?.classList.add('bg-red-700','hover:bg-red-800');
+  btnEl?.classList.remove('hover:bg-black/60');
+  btnEl?.classList.add('bg-red-700','hover:bg-red-800');
 
   try {
     currentViewer = pannellum.viewer('panorama-viewer', {
@@ -77,7 +126,7 @@ function updateFloorplanPin(sceneKey) {
   floorplanPin.style.display = 'block';
   floorplanPin.style.left = pos.left;
   floorplanPin.style.top = pos.top;
-  floorplanPin.title = scenes[sceneKey]?.title || '';
+  floorplanPin.title = scenes[sceneKey]?.group || '';
 }
 
 function setupControls() {
@@ -105,8 +154,7 @@ window.addEventListener('DOMContentLoaded', () => {
   setupControls();
   // load first scene by default
   const firstKey = Object.keys(scenes)[0];
-  const firstBtn = buttonsContainer.children[0];
-  if (firstKey) loadScene(firstKey, firstBtn);
+  if (firstKey) loadScene(firstKey, buttonMap[firstKey]);
 
   const btnFloorplan = document.getElementById('btn-floorplan');
   const fp = document.getElementById('floorplan');
