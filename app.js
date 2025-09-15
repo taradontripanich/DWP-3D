@@ -5,17 +5,18 @@ let floorplanVisible = true;
 const scenes = window.SCENES || {};
 const buttonsContainer = document.getElementById('scene-buttons');
 const buttonMap = {};
-const floorplanPin = document.getElementById('fp-pin');
+const floorplanPinsContainer = document.getElementById('fp-pins');
+const floorplanPins = {};
 
 const floorplanPositions = {
-  livdin_v1: { left: '75%', top: '35%' },
-  livdin_v2: { left: '75%', top: '35%' },
-  livdin_v3: { left: '75%', top: '35%' },
-  msbed_v1: { left: '16%', top: '20%' },
-  msbed_v2: { left: '16%', top: '20%' },
-  msbed_v3: { left: '10%', top: '40%' },
-  msbed_v4: { left: '10%', top: '40%' },
-  bedroom2: { left: '18%', top: '75%' }
+  livdin_v1: { left: '75%', top: '30%' },
+  livdin_v2: { left: '85%', top: '30%' },
+  livdin_v3: { left: '85%', top: '55%' },
+  msbed_v1: { left: '20%', top: '20%' },
+  msbed_v2: { left: '30%', top: '20%' },
+  msbed_v3: { left: '20%', top: '45%' },
+  msbed_v4: { left: '30%', top: '45%' },
+  bedroom2: { left: '25%', top: '70%' }
 };
 
 function buildButtons() {
@@ -74,6 +75,19 @@ function buildButtons() {
   });
 }
 
+function buildFloorplanPins() {
+  if (!floorplanPinsContainer) return;
+  Object.entries(floorplanPositions).forEach(([key, pos]) => {
+    const pin = document.createElement('button');
+    pin.className = 'absolute w-4 h-4 bg-red-600 rounded-full -translate-x-1/2 -translate-y-1/2';
+    pin.style.left = pos.left;
+    pin.style.top = pos.top;
+    pin.addEventListener('click', () => loadScene(key, buttonMap[key]));
+    floorplanPinsContainer.appendChild(pin);
+    floorplanPins[key] = pin;
+  });
+}
+
 function loadScene(key, btnEl) {
   const container = document.getElementById('panorama-viewer');
   // clear active state
@@ -113,20 +127,19 @@ function loadScene(key, btnEl) {
     container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to initialize viewer.</div>';
   }
 
-  updateFloorplanPin(key);
+  highlightFloorplanPin(key);
 }
 
-function updateFloorplanPin(sceneKey) {
-  if (!floorplanPin) return;
-  const pos = floorplanPositions[sceneKey];
-  if (!pos) {
-    floorplanPin.style.display = 'none';
-    return;
+function highlightFloorplanPin(sceneKey) {
+  Object.values(floorplanPins).forEach(pin => {
+    pin.classList.remove('ring-2', 'ring-white', 'bg-red-700');
+    pin.classList.add('bg-red-600');
+  });
+  const active = floorplanPins[sceneKey];
+  if (active) {
+    active.classList.remove('bg-red-600');
+    active.classList.add('bg-red-700', 'ring-2', 'ring-white');
   }
-  floorplanPin.style.display = 'block';
-  floorplanPin.style.left = pos.left;
-  floorplanPin.style.top = pos.top;
-  floorplanPin.title = scenes[sceneKey]?.group || '';
 }
 
 function setupControls() {
@@ -152,6 +165,7 @@ function setupControls() {
 window.addEventListener('DOMContentLoaded', () => {
   buildButtons();
   setupControls();
+  buildFloorplanPins();
   // load first scene by default
   const firstKey = Object.keys(scenes)[0];
   if (firstKey) loadScene(firstKey, buttonMap[firstKey]);
