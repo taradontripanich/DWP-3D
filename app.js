@@ -7,7 +7,6 @@ const buttonsContainer = document.getElementById('scene-buttons');
 const buttonMap = {};
 const floorplanPinsContainer = document.getElementById('fp-pins');
 const floorplanPins = {};
-let activeSceneKey = null;
 
 function buildButtons() {
   const groups = {};
@@ -83,41 +82,17 @@ function buildFloorplanPins() {
   if (!floorplanPinsContainer) return;
   floorplanPinsContainer.innerHTML = '';
   Object.keys(floorplanPins).forEach((key) => delete floorplanPins[key]);
-  const svgNS = 'http://www.w3.org/2000/svg';
   Object.entries(scenes).forEach(([key, scene]) => {
     const fp = scene.floorplan;
     if (!fp) return;
     const left = toPercent(fp.x ?? fp.left);
     const top = toPercent(fp.y ?? fp.top);
-    const headingValue = typeof fp.heading === 'number' ? fp.heading : parseFloat(fp.heading ?? 0);
-    const heading = Number.isFinite(headingValue) ? headingValue : 0;
     const pin = document.createElement('button');
     pin.type = 'button';
     pin.className = 'floorplan-pin';
     pin.style.left = left;
     pin.style.top = top;
     pin.setAttribute('aria-label', scene.title || key);
-
-    const coneWrapper = document.createElement('span');
-    coneWrapper.classList.add('floorplan-cone-wrapper');
-
-    const cone = document.createElementNS(svgNS, 'svg');
-    cone.classList.add('floorplan-cone');
-    cone.setAttribute('viewBox', '0 0 120 120');
-    cone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
-
-    const conePath = document.createElementNS(svgNS, 'path');
-    conePath.classList.add('floorplan-cone-shape');
-    conePath.setAttribute('d', 'M60 116 L12 12 L108 12 Z');
-    cone.appendChild(conePath);
-
-    const coneDetail = document.createElementNS(svgNS, 'path');
-    coneDetail.classList.add('floorplan-cone-detail');
-    coneDetail.setAttribute('d', 'M60 116 L60 28 M60 116 L36 28 M60 116 L84 28');
-    cone.appendChild(coneDetail);
-
-    coneWrapper.appendChild(cone);
-    pin.appendChild(coneWrapper);
 
     const dot = document.createElement('span');
     dot.className = 'floorplan-pin-dot';
@@ -129,9 +104,7 @@ function buildFloorplanPins() {
     });
     floorplanPinsContainer.appendChild(pin);
     floorplanPins[key] = {
-      pin,
-      cone,
-      heading
+      pin
     };
   });
 }
@@ -168,9 +141,6 @@ function loadScene(key, btnEl) {
       autoRotate: autoRotateOn ? -2 : 0,
       hotSpots: scene.hotspots || []
     });
-    const handleOrientationUpdate = () => updateActiveFloorplanCone();
-    currentViewer.on('load', handleOrientationUpdate);
-    currentViewer.on('viewchange', handleOrientationUpdate);
     currentViewer.on('error', () => {
       container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to load scene.</div>';
     });
@@ -186,32 +156,9 @@ function highlightFloorplanPin(sceneKey) {
     pin.classList.remove('active');
   });
   const active = floorplanPins[sceneKey];
-  activeSceneKey = active ? sceneKey : null;
   if (active) {
     active.pin.classList.add('active');
-    updateActiveFloorplanCone();
   }
-}
-
-const CONE_TRANSLATE = 'translate(-60px, -116px)';
-const CONE_ORIGIN = '60px 116px';
-
-function updateFloorplanCone(sceneKey) {
-  const entry = floorplanPins[sceneKey];
-  if (!entry) return;
-  const yaw = typeof currentViewer?.getYaw === 'function' ? currentViewer.getYaw() : 0;
-  const rotation = normalizeDegrees(-yaw + entry.heading);
-  entry.cone.style.transformOrigin = CONE_ORIGIN;
-  entry.cone.style.transform = `${CONE_TRANSLATE} rotate(${rotation}deg)`;
-}
-
-function normalizeDegrees(value) {
-  return ((value % 360) + 360) % 360;
-}
-
-function updateActiveFloorplanCone() {
-  if (!activeSceneKey) return;
-  updateFloorplanCone(activeSceneKey);
 }
 
 function setupControls() {

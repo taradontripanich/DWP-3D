@@ -73,44 +73,6 @@
       background: #dc2626;
     }
 
-    .floorplan-cone-wrapper {
-      position: absolute;
-      left: 50%;
-      top: 50%;
-      width: 0;
-      height: 0;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .floorplan-cone {
-      display: block;
-      width: 120px;
-      height: 120px;
-      transform-origin: 60px 116px;
-      transform: translate(-60px, -116px) rotate(0deg);
-      opacity: 0;
-      transition: opacity 0.2s ease-in-out;
-      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
-    }
-
-    .floorplan-cone-shape {
-      fill: rgba(220, 38, 38, 0.35);
-      stroke: rgba(220, 38, 38, 0.85);
-      stroke-width: 4;
-      stroke-linejoin: round;
-    }
-
-    .floorplan-cone-detail {
-      fill: none;
-      stroke: rgba(220, 38, 38, 0.35);
-      stroke-width: 2;
-      stroke-linecap: round;
-    }
-
-    .floorplan-pin.active .floorplan-cone {
-      opacity: 1;
-    }
   </style>
 </head>
 <body class="bg-black font-sans antialiased h-screen overflow-hidden">
