@@ -7,16 +7,18 @@ const buttonsContainer = document.getElementById('scene-buttons');
 const buttonMap = {};
 const floorplanPinsContainer = document.getElementById('fp-pins');
 const floorplanPins = {};
+let activeSceneKey = null;
 
+// heading rotates the floor plan cone so a yaw of 0 points in the desired direction.
 const floorplanPositions = {
-  livdin_v1: { left: '75%', top: '30%' },
-  livdin_v2: { left: '85%', top: '30%' },
-  livdin_v3: { left: '85%', top: '55%' },
-  msbed_v1: { left: '20%', top: '20%' },
-  msbed_v2: { left: '30%', top: '20%' },
-  msbed_v3: { left: '20%', top: '45%' },
-  msbed_v4: { left: '30%', top: '45%' },
-  bedroom2: { left: '25%', top: '70%' }
+  livdin_v1: { left: '75%', top: '30%', heading: 0 },
+  livdin_v2: { left: '85%', top: '30%', heading: 0 },
+  livdin_v3: { left: '85%', top: '55%', heading: 0 },
+  msbed_v1: { left: '20%', top: '20%', heading: 0 },
+  msbed_v2: { left: '30%', top: '20%', heading: 0 },
+  msbed_v3: { left: '20%', top: '45%', heading: 0 },
+  msbed_v4: { left: '30%', top: '45%', heading: 0 },
+  bedroom2: { left: '25%', top: '70%', heading: 0 }
 };
 
 function buildButtons() {
@@ -79,12 +81,28 @@ function buildFloorplanPins() {
   if (!floorplanPinsContainer) return;
   Object.entries(floorplanPositions).forEach(([key, pos]) => {
     const pin = document.createElement('button');
-    pin.className = 'absolute w-4 h-4 bg-yellow-400 rounded-full -translate-x-1/2 -translate-y-1/2';
+    pin.type = 'button';
+    pin.className = 'floorplan-pin';
     pin.style.left = pos.left;
     pin.style.top = pos.top;
+
+    const cone = document.createElement('span');
+    cone.className = 'floorplan-cone';
+    pin.appendChild(cone);
+
+    const dot = document.createElement('span');
+    dot.className = 'floorplan-pin-dot';
+    pin.appendChild(dot);
+
     pin.addEventListener('click', () => loadScene(key, buttonMap[key]));
     floorplanPinsContainer.appendChild(pin);
-    floorplanPins[key] = pin;
+    let heading = typeof pos.heading === 'number' ? pos.heading : parseFloat(pos.heading ?? 0);
+    heading = Number.isFinite(heading) ? heading : 0;
+    floorplanPins[key] = {
+      pin,
+      cone,
+      heading
+    };
   });
 }
 
@@ -120,6 +138,9 @@ function loadScene(key, btnEl) {
       autoRotate: autoRotateOn ? -2 : 0,
       hotSpots: scene.hotspots || []
     });
+    const handleOrientationUpdate = () => updateActiveFloorplanCone();
+    currentViewer.on('load', handleOrientationUpdate);
+    currentViewer.on('animate', handleOrientationUpdate);
     currentViewer.on('error', () => {
       container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to load scene.</div>';
     });
@@ -131,15 +152,32 @@ function loadScene(key, btnEl) {
 }
 
 function highlightFloorplanPin(sceneKey) {
-  Object.values(floorplanPins).forEach(pin => {
-    pin.classList.remove('ring-2', 'ring-white', 'bg-red-600');
-    pin.classList.add('bg-yellow-400');
+  Object.values(floorplanPins).forEach(({ pin }) => {
+    pin.classList.remove('active');
   });
   const active = floorplanPins[sceneKey];
+  activeSceneKey = active ? sceneKey : null;
   if (active) {
-    active.classList.remove('bg-yellow-400');
-    active.classList.add('bg-red-600', 'ring-2', 'ring-white');
+    active.pin.classList.add('active');
+    updateActiveFloorplanCone();
   }
+}
+
+function updateFloorplanCone(sceneKey) {
+  const entry = floorplanPins[sceneKey];
+  if (!entry) return;
+  const yaw = typeof currentViewer?.getYaw === 'function' ? currentViewer.getYaw() : 0;
+  const rotation = normalizeDegrees(yaw + entry.heading);
+  entry.cone.style.setProperty('--cone-rotation', `${rotation}deg`);
+}
+
+function normalizeDegrees(value) {
+  return ((value % 360) + 360) % 360;
+}
+
+function updateActiveFloorplanCone() {
+  if (!activeSceneKey) return;
+  updateFloorplanCone(activeSceneKey);
 }
 
 function setupControls() {
