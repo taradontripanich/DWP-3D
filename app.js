@@ -181,12 +181,16 @@ function highlightFloorplanPin(sceneKey) {
   }
 }
 
+const CONE_TRANSLATE = 'translate(-60px, -116px)';
+const CONE_ORIGIN = '60px 116px';
+
 function updateFloorplanCone(sceneKey) {
   const entry = floorplanPins[sceneKey];
   if (!entry) return;
   const yaw = typeof currentViewer?.getYaw === 'function' ? currentViewer.getYaw() : 0;
   const rotation = normalizeDegrees(yaw + entry.heading);
-  entry.cone.style.setProperty('--cone-rotation', `${rotation}deg`);
+  entry.cone.style.transformOrigin = CONE_ORIGIN;
+  entry.cone.style.transform = `${CONE_TRANSLATE} rotate(${rotation}deg)`;
 }
 
 function normalizeDegrees(value) {
