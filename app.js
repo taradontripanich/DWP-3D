@@ -79,7 +79,7 @@ function buildFloorplanPins() {
   if (!floorplanPinsContainer) return;
   Object.entries(floorplanPositions).forEach(([key, pos]) => {
     const pin = document.createElement('button');
-    pin.className = 'absolute w-4 h-4 bg-red-600 rounded-full -translate-x-1/2 -translate-y-1/2';
+    pin.className = 'absolute w-4 h-4 bg-yellow-400 rounded-full -translate-x-1/2 -translate-y-1/2';
     pin.style.left = pos.left;
     pin.style.top = pos.top;
     pin.addEventListener('click', () => loadScene(key, buttonMap[key]));
@@ -132,13 +132,13 @@ function loadScene(key, btnEl) {
 
 function highlightFloorplanPin(sceneKey) {
   Object.values(floorplanPins).forEach(pin => {
-    pin.classList.remove('ring-2', 'ring-white', 'bg-red-700');
-    pin.classList.add('bg-red-600');
+    pin.classList.remove('ring-2', 'ring-white', 'bg-red-600');
+    pin.classList.add('bg-yellow-400');
   });
   const active = floorplanPins[sceneKey];
   if (active) {
-    active.classList.remove('bg-red-600');
-    active.classList.add('bg-red-700', 'ring-2', 'ring-white');
+    active.classList.remove('bg-yellow-400');
+    active.classList.add('bg-red-600', 'ring-2', 'ring-white');
   }
 }
 
