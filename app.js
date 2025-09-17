@@ -87,6 +87,9 @@ function buildFloorplanPins() {
     pin.style.left = pos.left;
     pin.style.top = pos.top;
 
+    const coneWrapper = document.createElement('span');
+    coneWrapper.classList.add('floorplan-cone-wrapper');
+
     const cone = document.createElementNS(svgNS, 'svg');
     cone.classList.add('floorplan-cone');
     cone.setAttribute('viewBox', '0 0 120 120');
@@ -102,7 +105,8 @@ function buildFloorplanPins() {
     coneDetail.setAttribute('d', 'M60 116 L60 28 M60 116 L36 28 M60 116 L84 28');
     cone.appendChild(coneDetail);
 
-    pin.appendChild(cone);
+    coneWrapper.appendChild(cone);
+    pin.appendChild(coneWrapper);
 
     const dot = document.createElement('span');
     dot.className = 'floorplan-pin-dot';
