@@ -5,6 +5,7 @@ window.SCENES = {
     url: "assets/images/Living_Room-View1.jpg",
     hotspots: [
       {
+        // Adjust pitch (vertical) and yaw (horizontal) to move the hsimage.png hotspot dot.
         type: 'scene',
         sceneId: 'livdin_v2',
         pitch: 0,
