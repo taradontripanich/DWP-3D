@@ -3,19 +3,70 @@ window.SCENES = {
     group: "Living & Dining",
     title: "View 1",
     url: "assets/images/Living_Room-View1.jpg",
-    hotspots: []
+    hotspots: [
+      {
+        type: 'scene',
+        sceneId: 'livdin_v2',
+        pitch: 0,
+        yaw: 75,
+        text: 'Living & Dining View 2',
+        cssClass: 'hs-dot'
+      },
+      {
+        type: 'scene',
+        sceneId: 'livdin_v3',
+        pitch: 0,
+        yaw: -75,
+        text: 'Living & Dining View 3',
+        cssClass: 'hs-dot'
+      }
+    ]
   },
   livdin_v2: {
     group: "Living & Dining",
     title: "View 2",
     url: "assets/images/Living_Room-View2.jpg",
-    hotspots: []
+    hotspots: [
+      {
+        type: 'scene',
+        sceneId: 'livdin_v1',
+        pitch: 0,
+        yaw: -90,
+        text: 'Living & Dining View 1',
+        cssClass: 'hs-dot'
+      },
+      {
+        type: 'scene',
+        sceneId: 'livdin_v3',
+        pitch: 0,
+        yaw: 90,
+        text: 'Living & Dining View 3',
+        cssClass: 'hs-dot'
+      }
+    ]
   },
   livdin_v3: {
     group: "Living & Dining",
     title: "View 3",
     url: "assets/images/Living_Room-View3.jpg",
-    hotspots: []
+    hotspots: [
+      {
+        type: 'scene',
+        sceneId: 'livdin_v1',
+        pitch: 0,
+        yaw: 60,
+        text: 'Living & Dining View 1',
+        cssClass: 'hs-dot'
+      },
+      {
+        type: 'scene',
+        sceneId: 'livdin_v2',
+        pitch: 0,
+        yaw: -60,
+        text: 'Living & Dining View 2',
+        cssClass: 'hs-dot'
+      }
+    ]
   },
   msbed_v1: {
     group: "Master Bedroom",
