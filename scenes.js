@@ -78,7 +78,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'msbed_v2',
         pitch: 0,
-        yaw: 60,
+        yaw: 55,
         text: 'Master Bedroom View 2',
         cssClass: 'hs-dot'
       },
@@ -86,7 +86,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'msbed_v3',
         pitch: 0,
-        yaw: -60,
+        yaw: -55,
         text: 'Master Bedroom View 3',
         cssClass: 'hs-dot'
       }
@@ -101,7 +101,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'msbed_v1',
         pitch: 0,
-        yaw: -60,
+        yaw: -55,
         text: 'Master Bedroom View 1',
         cssClass: 'hs-dot'
       },
@@ -109,7 +109,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'msbed_v3',
         pitch: 0,
-        yaw: 45,
+        yaw: 55,
         text: 'Master Bedroom View 3',
         cssClass: 'hs-dot'
       }
@@ -124,7 +124,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'msbed_v1',
         pitch: 0,
-        yaw: 110,
+        yaw: 55,
         text: 'Master Bedroom View 1',
         cssClass: 'hs-dot'
       },
@@ -132,7 +132,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'msbed_v2',
         pitch: 0,
-        yaw: -90,
+        yaw: -55,
         text: 'Master Bedroom View 2',
         cssClass: 'hs-dot'
       }
