@@ -3,6 +3,13 @@ window.SCENES = {
     group: "Living & Dining",
     title: "View 1",
     url: "assets/images/Living_Room-View1.jpg",
+    floorplan: {
+      // Position the floor plan pin using percentages of the image width / height.
+      x: 75,
+      y: 30,
+      // Rotate the floor plan cone so yaw 0 points in the correct direction for this view.
+      heading: 0
+    },
     hotspots: [
       {
         // Adjust pitch (vertical) and yaw (horizontal) to move the hsimage.png hotspot dot.
@@ -27,6 +34,11 @@ window.SCENES = {
     group: "Living & Dining",
     title: "View 2",
     url: "assets/images/Living_Room-View2.jpg",
+    floorplan: {
+      x: 85,
+      y: 30,
+      heading: 0
+    },
     hotspots: [
       {
         type: 'scene',
@@ -50,6 +62,11 @@ window.SCENES = {
     group: "Living & Dining",
     title: "View 3",
     url: "assets/images/Living_Room-View3.jpg",
+    floorplan: {
+      x: 85,
+      y: 55,
+      heading: 0
+    },
     hotspots: [
       {
         type: 'scene',
@@ -73,6 +90,11 @@ window.SCENES = {
     group: "Master Bedroom",
     title: "View 1",
     url: "assets/images/Master_bedroom-View1.jpg",
+    floorplan: {
+      x: 20,
+      y: 20,
+      heading: 0
+    },
     hotspots: [
       {
         type: 'scene',
@@ -96,6 +118,11 @@ window.SCENES = {
     group: "Master Bedroom",
     title: "View 2",
     url: "assets/images/Master_bedroom-View2.jpg",
+    floorplan: {
+      x: 30,
+      y: 20,
+      heading: 0
+    },
     hotspots: [
       {
         type: 'scene',
@@ -119,6 +146,11 @@ window.SCENES = {
     group: "Master Bedroom",
     title: "View 3",
     url: "assets/images/Master_bedroom-View3.jpg",
+    floorplan: {
+      x: 20,
+      y: 45,
+      heading: 0
+    },
     hotspots: [
       {
         type: 'scene',
@@ -142,6 +174,11 @@ window.SCENES = {
     group: "Bedroom 2",
     title: "View 1",
     url: "assets/images/Bedroom2-View1.jpg",
+    floorplan: {
+      x: 25,
+      y: 70,
+      heading: 0
+    },
     hotspots: []
   }
 };

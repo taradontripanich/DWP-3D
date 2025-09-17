@@ -9,18 +9,6 @@ const floorplanPinsContainer = document.getElementById('fp-pins');
 const floorplanPins = {};
 let activeSceneKey = null;
 
-// heading rotates the floor plan cone so a yaw of 0 points in the desired direction.
-const floorplanPositions = {
-  livdin_v1: { left: '75%', top: '30%', heading: 0 },
-  livdin_v2: { left: '85%', top: '30%', heading: 0 },
-  livdin_v3: { left: '85%', top: '55%', heading: 0 },
-  msbed_v1: { left: '20%', top: '20%', heading: 0 },
-  msbed_v2: { left: '30%', top: '20%', heading: 0 },
-  msbed_v3: { left: '20%', top: '45%', heading: 0 },
-  msbed_v4: { left: '30%', top: '45%', heading: 0 },
-  bedroom2: { left: '25%', top: '70%', heading: 0 }
-};
-
 function buildButtons() {
   const groups = {};
   Object.entries(scenes).forEach(([key, scene]) => {
@@ -77,15 +65,38 @@ function buildButtons() {
   });
 }
 
+function toPercent(value, fallback = 50) {
+  if (typeof value === 'string') {
+    const trimmed = value.trim();
+    if (trimmed.endsWith('%')) return trimmed;
+    const numeric = parseFloat(trimmed);
+    if (Number.isFinite(numeric)) return `${numeric}%`;
+  }
+  if (typeof value === 'number') {
+    const scaled = value <= 1 && value >= 0 ? value * 100 : value;
+    return `${scaled}%`;
+  }
+  return `${fallback}%`;
+}
+
 function buildFloorplanPins() {
   if (!floorplanPinsContainer) return;
+  floorplanPinsContainer.innerHTML = '';
+  Object.keys(floorplanPins).forEach((key) => delete floorplanPins[key]);
   const svgNS = 'http://www.w3.org/2000/svg';
-  Object.entries(floorplanPositions).forEach(([key, pos]) => {
+  Object.entries(scenes).forEach(([key, scene]) => {
+    const fp = scene.floorplan;
+    if (!fp) return;
+    const left = toPercent(fp.x ?? fp.left);
+    const top = toPercent(fp.y ?? fp.top);
+    const headingValue = typeof fp.heading === 'number' ? fp.heading : parseFloat(fp.heading ?? 0);
+    const heading = Number.isFinite(headingValue) ? headingValue : 0;
     const pin = document.createElement('button');
     pin.type = 'button';
     pin.className = 'floorplan-pin';
-    pin.style.left = pos.left;
-    pin.style.top = pos.top;
+    pin.style.left = left;
+    pin.style.top = top;
+    pin.setAttribute('aria-label', scene.title || key);
 
     const coneWrapper = document.createElement('span');
     coneWrapper.classList.add('floorplan-cone-wrapper');
@@ -112,10 +123,11 @@ function buildFloorplanPins() {
     dot.className = 'floorplan-pin-dot';
     pin.appendChild(dot);
 
-    pin.addEventListener('click', () => loadScene(key, buttonMap[key]));
+    pin.addEventListener('click', () => {
+      const button = buttonMap[key];
+      loadScene(key, button);
+    });
     floorplanPinsContainer.appendChild(pin);
-    let heading = typeof pos.heading === 'number' ? pos.heading : parseFloat(pos.heading ?? 0);
-    heading = Number.isFinite(heading) ? heading : 0;
     floorplanPins[key] = {
       pin,
       cone,
@@ -188,7 +200,7 @@ function updateFloorplanCone(sceneKey) {
   const entry = floorplanPins[sceneKey];
   if (!entry) return;
   const yaw = typeof currentViewer?.getYaw === 'function' ? currentViewer.getYaw() : 0;
-  const rotation = normalizeDegrees(yaw + entry.heading);
+  const rotation = normalizeDegrees(-yaw + entry.heading);
   entry.cone.style.transformOrigin = CONE_ORIGIN;
   entry.cone.style.transform = `${CONE_TRANSLATE} rotate(${rotation}deg)`;
 }
