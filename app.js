@@ -79,6 +79,7 @@ function buildButtons() {
 
 function buildFloorplanPins() {
   if (!floorplanPinsContainer) return;
+  const svgNS = 'http://www.w3.org/2000/svg';
   Object.entries(floorplanPositions).forEach(([key, pos]) => {
     const pin = document.createElement('button');
     pin.type = 'button';
@@ -86,8 +87,21 @@ function buildFloorplanPins() {
     pin.style.left = pos.left;
     pin.style.top = pos.top;
 
-    const cone = document.createElement('span');
-    cone.className = 'floorplan-cone';
+    const cone = document.createElementNS(svgNS, 'svg');
+    cone.classList.add('floorplan-cone');
+    cone.setAttribute('viewBox', '0 0 120 120');
+    cone.setAttribute('preserveAspectRatio', 'xMidYMid meet');
+
+    const conePath = document.createElementNS(svgNS, 'path');
+    conePath.classList.add('floorplan-cone-shape');
+    conePath.setAttribute('d', 'M60 116 L12 12 L108 12 Z');
+    cone.appendChild(conePath);
+
+    const coneDetail = document.createElementNS(svgNS, 'path');
+    coneDetail.classList.add('floorplan-cone-detail');
+    coneDetail.setAttribute('d', 'M60 116 L60 28 M60 116 L36 28 M60 116 L84 28');
+    cone.appendChild(coneDetail);
+
     pin.appendChild(cone);
 
     const dot = document.createElement('span');
@@ -140,7 +154,7 @@ function loadScene(key, btnEl) {
     });
     const handleOrientationUpdate = () => updateActiveFloorplanCone();
     currentViewer.on('load', handleOrientationUpdate);
-    currentViewer.on('animate', handleOrientationUpdate);
+    currentViewer.on('viewchange', handleOrientationUpdate);
     currentViewer.on('error', () => {
       container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to load scene.</div>';
     });

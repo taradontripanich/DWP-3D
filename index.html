@@ -77,17 +77,29 @@
       position: absolute;
       left: 50%;
       top: 50%;
-      width: 0;
-      height: 0;
-      border-left: 14px solid transparent;
-      border-right: 14px solid transparent;
-      border-bottom: 30px solid rgba(220, 38, 38, 0.45);
+      width: 120px;
+      height: 120px;
       transform-origin: 50% 100%;
-      transform: translate(-50%, -105%) rotate(var(--cone-rotation, 0deg));
+      transform: translate(-50%, calc(-100% + 4px)) rotate(var(--cone-rotation, 0deg));
       opacity: 0;
       transition: opacity 0.2s ease-in-out;
       pointer-events: none;
       z-index: 1;
+      filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.35));
+    }
+
+    .floorplan-cone-shape {
+      fill: rgba(220, 38, 38, 0.35);
+      stroke: rgba(220, 38, 38, 0.85);
+      stroke-width: 4;
+      stroke-linejoin: round;
+    }
+
+    .floorplan-cone-detail {
+      fill: none;
+      stroke: rgba(220, 38, 38, 0.35);
+      stroke-width: 2;
+      stroke-linecap: round;
     }
 
     .floorplan-pin.active .floorplan-cone {
