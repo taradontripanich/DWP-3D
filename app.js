@@ -1,6 +1,12 @@
 let currentViewer = null;
 let autoRotateOn = true;
 let floorplanVisible = true;
+let isTransitioning = false;
+
+const DEFAULT_HFOV = 100;
+const TRANSITION_HFOV = 40;
+const ZOOM_IN_DURATION = 450;
+const ZOOM_OUT_DURATION = 550;
 
 const scenes = window.SCENES || {};
 const buttonsContainer = document.getElementById('scene-buttons');
@@ -186,6 +192,7 @@ function buildViewerConfig(firstKey) {
     config.scenes[key] = {
       type: 'equirectangular',
       panorama: scene.url,
+      hfov: scene.hfov || DEFAULT_HFOV,
       hotSpots
     };
   });
@@ -214,7 +221,7 @@ function initializeViewer(firstKey) {
 
   currentViewer.on('load', () => {
     hideViewerError();
-    if (autoRotateOn) {
+    if (autoRotateOn && !isTransitioning) {
       currentViewer.startAutoRotate(-2);
     }
   });
@@ -227,15 +234,115 @@ function initializeViewer(firstKey) {
   highlightFloorplanPin(firstKey);
 }
 
-function loadScene(key, btnEl) {
-  if (!currentViewer || !scenes[key]) return;
+function animateHfov(target, duration) {
+  return new Promise((resolve) => {
+    if (!currentViewer) {
+      resolve();
+      return;
+    }
+    const start = currentViewer.getHfov();
+    const delta = target - start;
+    if (Math.abs(delta) < 0.5 || duration <= 0) {
+      currentViewer.setHfov(target);
+      resolve();
+      return;
+    }
+
+    const startTime = performance.now();
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const t = Math.min(1, elapsed / duration);
+      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease in-out
+      currentViewer.setHfov(start + delta * eased);
+      if (t < 1) {
+        requestAnimationFrame(step);
+      } else {
+        resolve();
+      }
+    }
+
+    requestAnimationFrame(step);
+  });
+}
+
+function waitForSceneLoad() {
+  if (!currentViewer) {
+    return {
+      promise: Promise.resolve(),
+      cancel: () => {}
+    };
+  }
+
+  let cleaned = false;
+  let handleLoad;
+  let handleError;
+
+  const cleanup = () => {
+    if (cleaned) return;
+    cleaned = true;
+    currentViewer?.off('load', handleLoad);
+    currentViewer?.off('error', handleError);
+  };
+
+  const promise = new Promise((resolve, reject) => {
+    handleLoad = () => {
+      cleanup();
+      resolve();
+    };
+
+    handleError = () => {
+      cleanup();
+      reject(new Error('Failed to load scene.'));
+    };
+
+    currentViewer.on('load', handleLoad);
+    currentViewer.on('error', handleError);
+  });
+
+  return { promise, cancel: cleanup };
+}
+
+async function loadScene(key, btnEl) {
+  if (!currentViewer || !scenes[key] || isTransitioning) return;
+
   if (btnEl) {
     setActiveButton(key);
   }
+
+  isTransitioning = true;
+  if (autoRotateOn) {
+    currentViewer.stopAutoRotate();
+  }
+
+  const previousScene = typeof currentViewer.getScene === 'function' ? currentViewer.getScene() : null;
+  const startingHfov = currentViewer.getHfov();
+  const targetHfov = scenes[key].hfov || DEFAULT_HFOV;
+
+  const waitForLoad = waitForSceneLoad();
+
   try {
+    await animateHfov(TRANSITION_HFOV, ZOOM_IN_DURATION);
     currentViewer.loadScene(key);
+    await waitForLoad.promise;
+    await animateHfov(targetHfov, ZOOM_OUT_DURATION);
+    hideViewerError();
+    if (autoRotateOn) {
+      currentViewer.startAutoRotate(-2);
+    }
   } catch (err) {
+    waitForLoad.cancel();
+    await animateHfov(startingHfov, ZOOM_OUT_DURATION);
+    if (previousScene) {
+      setActiveButton(previousScene);
+      highlightFloorplanPin(previousScene);
+    }
     showViewerError('Failed to load scene.');
+    if (autoRotateOn) {
+      currentViewer.startAutoRotate(-2);
+    }
+  } finally {
+    isTransitioning = false;
   }
 }
 
