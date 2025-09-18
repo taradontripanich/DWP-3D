@@ -40,10 +40,10 @@ window.SCENES = {
     hotspots: [
       {
         type: 'scene',
-        sceneId: 'Central View',
+        sceneId: 'livdin_v1',
         pitch: 0,
         yaw: -90,
-        text: 'Living & Dining View 1',
+        text: 'Central View',
         cssClass: 'hs-dot'
       },
       {
