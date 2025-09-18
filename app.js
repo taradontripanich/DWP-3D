@@ -1,19 +1,12 @@
 let currentViewer = null;
 let autoRotateOn = true;
 let floorplanVisible = true;
-let isTransitioning = false;
-
-const DEFAULT_HFOV = 100;
-const TRANSITION_HFOV = 40;
-const ZOOM_IN_DURATION = 450;
-const ZOOM_OUT_DURATION = 550;
 
 const scenes = window.SCENES || {};
 const buttonsContainer = document.getElementById('scene-buttons');
 const buttonMap = {};
 const floorplanPinsContainer = document.getElementById('fp-pins');
 const floorplanPins = {};
-let errorOverlay = null;
 
 function buildButtons() {
   const groups = {};
@@ -116,6 +109,48 @@ function buildFloorplanPins() {
   });
 }
 
+function loadScene(key, btnEl) {
+  const container = document.getElementById('panorama-viewer');
+  // clear active state
+  Object.values(buttonMap).forEach(el => {
+    el.classList.remove('bg-red-600','hover:bg-red-700','bg-red-700','hover:bg-red-800');
+    el.classList.add('hover:bg-black/60');
+  });
+
+  // destroy old viewer
+  if (currentViewer) {
+    currentViewer.destroy();
+    currentViewer = null;
+    while (container.firstChild) container.removeChild(container.firstChild);
+  }
+
+  const scene = scenes[key];
+  if (!scene) {
+    container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Scene not found.</div>';
+    return;
+  }
+
+  btnEl?.classList.remove('hover:bg-black/60');
+  btnEl?.classList.add('bg-red-700','hover:bg-red-800');
+
+  try {
+    currentViewer = pannellum.viewer('panorama-viewer', {
+      type: 'equirectangular',
+      panorama: scene.url,
+      autoLoad: true,
+      autoRotate: autoRotateOn ? -2 : 0,
+      hotSpots: scene.hotspots || []
+    });
+    currentViewer.on('error', () => {
+      container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to load scene.</div>';
+    });
+  } catch (e) {
+    container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to initialize viewer.</div>';
+  }
+
+  highlightFloorplanPin(key);
+}
+
 function highlightFloorplanPin(sceneKey) {
   Object.values(floorplanPins).forEach(({ pin }) => {
     pin.classList.remove('active');
@@ -123,226 +158,6 @@ function highlightFloorplanPin(sceneKey) {
   const active = floorplanPins[sceneKey];
   if (active) {
     active.pin.classList.add('active');
-  }
-}
-
-function setActiveButton(sceneKey) {
-  Object.values(buttonMap).forEach((btn) => {
-    btn.classList.remove('bg-red-700', 'hover:bg-red-800');
-    btn.classList.add('hover:bg-black/60');
-  });
-  const btn = buttonMap[sceneKey];
-  if (btn) {
-    btn.classList.remove('hover:bg-black/60');
-    btn.classList.add('bg-red-700', 'hover:bg-red-800');
-  }
-}
-
-function ensureErrorOverlay() {
-  const container = document.getElementById('panorama-viewer');
-  if (!container) return null;
-  if (!errorOverlay) {
-    errorOverlay = document.createElement('div');
-    errorOverlay.className = 'absolute inset-0 flex items-center justify-center text-red-500 bg-black/60 hidden';
-    errorOverlay.setAttribute('role', 'alert');
-    container.appendChild(errorOverlay);
-  }
-  return errorOverlay;
-}
-
-function showViewerError(message) {
-  const overlay = ensureErrorOverlay();
-  if (!overlay) return;
-  overlay.textContent = message;
-  overlay.classList.remove('hidden');
-}
-
-function hideViewerError() {
-  if (!errorOverlay) return;
-  errorOverlay.classList.add('hidden');
-}
-
-function buildViewerConfig(firstKey) {
-  const config = {
-    default: {
-      firstScene: firstKey,
-      autoLoad: true,
-      autoRotate: autoRotateOn ? -2 : 0
-    },
-    scenes: {}
-  };
-
-  Object.entries(scenes).forEach(([key, scene]) => {
-    const baseHotspots = scene.hotspots || [];
-    const hotSpots = baseHotspots.map((hs) => {
-      if (hs.type === 'scene' && hs.sceneId) {
-        const targetKey = hs.target || hs.sceneId;
-        return {
-          ...hs,
-          sceneId: targetKey,
-          clickHandlerFunc: () => {
-            loadScene(targetKey);
-            return false;
-          }
-        };
-      }
-      return hs;
-    });
-
-    config.scenes[key] = {
-      type: 'equirectangular',
-      panorama: scene.url,
-      hfov: scene.hfov || DEFAULT_HFOV,
-      hotSpots
-    };
-  });
-
-  return config;
-}
-
-function initializeViewer(firstKey) {
-  if (!firstKey) return;
-  const config = buildViewerConfig(firstKey);
-
-  try {
-    currentViewer = pannellum.viewer('panorama-viewer', config);
-  } catch (err) {
-    showViewerError('Failed to initialize viewer.');
-    return;
-  }
-
-  ensureErrorOverlay();
-
-  currentViewer.on('scenechange', (sceneKey) => {
-    setActiveButton(sceneKey);
-    highlightFloorplanPin(sceneKey);
-    hideViewerError();
-  });
-
-  currentViewer.on('load', () => {
-    hideViewerError();
-    if (autoRotateOn && !isTransitioning) {
-      currentViewer.startAutoRotate(-2);
-    }
-  });
-
-  currentViewer.on('error', () => {
-    showViewerError('Failed to load scene.');
-  });
-
-  setActiveButton(firstKey);
-  highlightFloorplanPin(firstKey);
-}
-
-function animateHfov(target, duration) {
-  return new Promise((resolve) => {
-    if (!currentViewer) {
-      resolve();
-      return;
-    }
-    const start = currentViewer.getHfov();
-    const delta = target - start;
-    if (Math.abs(delta) < 0.5 || duration <= 0) {
-      currentViewer.setHfov(target);
-      resolve();
-      return;
-    }
-
-    const startTime = performance.now();
-
-    function step(now) {
-      const elapsed = now - startTime;
-      const t = Math.min(1, elapsed / duration);
-      const eased = t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t; // ease in-out
-      currentViewer.setHfov(start + delta * eased);
-      if (t < 1) {
-        requestAnimationFrame(step);
-      } else {
-        resolve();
-      }
-    }
-
-    requestAnimationFrame(step);
-  });
-}
-
-function waitForSceneLoad() {
-  if (!currentViewer) {
-    return {
-      promise: Promise.resolve(),
-      cancel: () => {}
-    };
-  }
-
-  let cleaned = false;
-  let handleLoad;
-  let handleError;
-
-  const cleanup = () => {
-    if (cleaned) return;
-    cleaned = true;
-    currentViewer?.off('load', handleLoad);
-    currentViewer?.off('error', handleError);
-  };
-
-  const promise = new Promise((resolve, reject) => {
-    handleLoad = () => {
-      cleanup();
-      resolve();
-    };
-
-    handleError = () => {
-      cleanup();
-      reject(new Error('Failed to load scene.'));
-    };
-
-    currentViewer.on('load', handleLoad);
-    currentViewer.on('error', handleError);
-  });
-
-  return { promise, cancel: cleanup };
-}
-
-async function loadScene(key, btnEl) {
-  if (!currentViewer || !scenes[key] || isTransitioning) return;
-
-  if (btnEl) {
-    setActiveButton(key);
-  }
-
-  isTransitioning = true;
-  if (autoRotateOn) {
-    currentViewer.stopAutoRotate();
-  }
-
-  const previousScene = typeof currentViewer.getScene === 'function' ? currentViewer.getScene() : null;
-  const startingHfov = currentViewer.getHfov();
-  const targetHfov = scenes[key].hfov || DEFAULT_HFOV;
-
-  const waitForLoad = waitForSceneLoad();
-
-  try {
-    await animateHfov(TRANSITION_HFOV, ZOOM_IN_DURATION);
-    currentViewer.loadScene(key);
-    await waitForLoad.promise;
-    await animateHfov(targetHfov, ZOOM_OUT_DURATION);
-    hideViewerError();
-    if (autoRotateOn) {
-      currentViewer.startAutoRotate(-2);
-    }
-  } catch (err) {
-    waitForLoad.cancel();
-    await animateHfov(startingHfov, ZOOM_OUT_DURATION);
-    if (previousScene) {
-      setActiveButton(previousScene);
-      highlightFloorplanPin(previousScene);
-    }
-    showViewerError('Failed to load scene.');
-    if (autoRotateOn) {
-      currentViewer.startAutoRotate(-2);
-    }
-  } finally {
-    isTransitioning = false;
   }
 }
 
@@ -372,9 +187,7 @@ window.addEventListener('DOMContentLoaded', () => {
   buildFloorplanPins();
   // load first scene by default
   const firstKey = Object.keys(scenes)[0];
-  if (firstKey) {
-    initializeViewer(firstKey);
-  }
+  if (firstKey) loadScene(firstKey, buttonMap[firstKey]);
 
   const btnFloorplan = document.getElementById('btn-floorplan');
   const fp = document.getElementById('floorplan');
