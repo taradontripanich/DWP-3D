@@ -42,7 +42,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'livdin_v1',
         pitch: 0,
-        yaw: -90,
+        yaw: 160,
         text: 'Central View',
         cssClass: 'hs-dot'
       },
@@ -50,7 +50,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'livdin_v3',
         pitch: 0,
-        yaw: 90,
+        yaw: 240,
         text: 'Media Lounge',
         cssClass: 'hs-dot'
       }
@@ -68,8 +68,8 @@ window.SCENES = {
       {
         type: 'scene',
         sceneId: 'livdin_v1',
-        pitch: 0,
-        yaw: 60,
+        pitch: -5,
+        yaw: 115,
         text: 'Central View',
         cssClass: 'hs-dot'
       },
@@ -77,7 +77,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'livdin_v2',
         pitch: 0,
-        yaw: -60,
+        yaw: 45,
         text: "Artist's Corner",
         cssClass: 'hs-dot'
       }
@@ -123,7 +123,7 @@ window.SCENES = {
         type: 'scene',
         sceneId: 'msbed_v3',
         pitch: -20,
-        yaw: 180,
+        yaw: 175,
         text: 'Spa Bathroom',
         cssClass: 'hs-dot'
       }
@@ -137,20 +137,12 @@ window.SCENES = {
       x: 10,
       y: 48
     },
-    hotspots: [
-      {
-        type: 'scene',
-        sceneId: 'msbed_v1',
-        pitch: 0,
-        yaw: 55,
-        text: 'Master Suite',
-        cssClass: 'hs-dot'
-      },
+    hotspots: [      
       {
         type: 'scene',
         sceneId: 'msbed_v2',
         pitch: 0,
-        yaw: -55,
+        yaw: 0,
         text: 'Walk-in Closet',
         cssClass: 'hs-dot'
       }
