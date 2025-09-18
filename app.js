@@ -109,6 +109,27 @@ function buildFloorplanPins() {
   });
 }
 
+function prepareHotspots(sceneKey) {
+  const scene = scenes[sceneKey];
+  if (!scene || !Array.isArray(scene.hotspots)) return [];
+
+  return scene.hotspots.map((hotspot) => {
+    if (!hotspot || hotspot.type !== 'scene') return hotspot;
+
+    const targetKey = hotspot.target || hotspot.sceneId;
+    if (!targetKey) return hotspot;
+
+    const cloned = { ...hotspot };
+    cloned.type = 'info';
+    cloned.clickHandlerFunc = () => {
+      const button = buttonMap[targetKey];
+      loadScene(targetKey, button);
+    };
+
+    return cloned;
+  });
+}
+
 function loadScene(key, btnEl) {
   const container = document.getElementById('panorama-viewer');
   // clear active state
@@ -116,6 +137,8 @@ function loadScene(key, btnEl) {
     el.classList.remove('bg-red-600','hover:bg-red-700','bg-red-700','hover:bg-red-800');
     el.classList.add('hover:bg-black/60');
   });
+
+  const activeButton = btnEl || buttonMap[key];
 
   // destroy old viewer
   if (currentViewer) {
@@ -130,8 +153,8 @@ function loadScene(key, btnEl) {
     return;
   }
 
-  btnEl?.classList.remove('hover:bg-black/60');
-  btnEl?.classList.add('bg-red-700','hover:bg-red-800');
+  activeButton?.classList.remove('hover:bg-black/60');
+  activeButton?.classList.add('bg-red-700','hover:bg-red-800');
 
   try {
     currentViewer = pannellum.viewer('panorama-viewer', {
@@ -139,7 +162,7 @@ function loadScene(key, btnEl) {
       panorama: scene.url,
       autoLoad: true,
       autoRotate: autoRotateOn ? -2 : 0,
-      hotSpots: scene.hotspots || []
+      hotSpots: prepareHotspots(key)
     });
     currentViewer.on('error', () => {
       container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to load scene.</div>';
