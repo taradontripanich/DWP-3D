@@ -7,6 +7,7 @@ const buttonsContainer = document.getElementById('scene-buttons');
 const buttonMap = {};
 const floorplanPinsContainer = document.getElementById('fp-pins');
 const floorplanPins = {};
+const viewerErrorOverlay = document.getElementById('viewer-error');
 
 function buildButtons() {
   const groups = {};
@@ -114,64 +115,117 @@ function prepareHotspots(sceneKey) {
   if (!scene || !Array.isArray(scene.hotspots)) return [];
 
   return scene.hotspots.map((hotspot) => {
-    if (!hotspot || hotspot.type !== 'scene') return hotspot;
+    if (!hotspot) return hotspot;
+    if (hotspot.type !== 'scene') return { ...hotspot };
 
     const targetKey = hotspot.target || hotspot.sceneId;
-    if (!targetKey) return hotspot;
+    if (!targetKey) return { ...hotspot };
 
-    const cloned = { ...hotspot };
-    cloned.type = 'info';
-    cloned.clickHandlerFunc = () => {
-      const button = buttonMap[targetKey];
-      loadScene(targetKey, button);
+    return {
+      ...hotspot,
+      type: 'info',
+      clickHandlerFunc: () => {
+        const button = buttonMap[targetKey];
+        loadScene(targetKey, button);
+      }
     };
-
-    return cloned;
   });
 }
 
-function loadScene(key, btnEl) {
-  const container = document.getElementById('panorama-viewer');
-  // clear active state
-  Object.values(buttonMap).forEach(el => {
-    el.classList.remove('bg-red-600','hover:bg-red-700','bg-red-700','hover:bg-red-800');
+function showViewerError(message) {
+  if (!viewerErrorOverlay) return;
+  viewerErrorOverlay.textContent = message;
+  viewerErrorOverlay.classList.remove('hidden');
+}
+
+function hideViewerError() {
+  if (!viewerErrorOverlay) return;
+  viewerErrorOverlay.textContent = '';
+  viewerErrorOverlay.classList.add('hidden');
+}
+
+function setActiveButton(sceneKey, btnEl) {
+  Object.values(buttonMap).forEach((el) => {
+    el.classList.remove('bg-red-600', 'hover:bg-red-700', 'bg-red-700', 'hover:bg-red-800');
     el.classList.add('hover:bg-black/60');
   });
 
-  const activeButton = btnEl || buttonMap[key];
-
-  // destroy old viewer
-  if (currentViewer) {
-    currentViewer.destroy();
-    currentViewer = null;
-    while (container.firstChild) container.removeChild(container.firstChild);
+  const activeButton = btnEl || buttonMap[sceneKey];
+  if (activeButton) {
+    activeButton.classList.remove('hover:bg-black/60');
+    activeButton.classList.add('bg-red-700', 'hover:bg-red-800');
   }
+}
+
+function loadScene(key, btnEl) {
+  if (!currentViewer) return;
 
   const scene = scenes[key];
   if (!scene) {
-    container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Scene not found.</div>';
+    showViewerError('Scene not found.');
     return;
   }
 
-  activeButton?.classList.remove('hover:bg-black/60');
-  activeButton?.classList.add('bg-red-700','hover:bg-red-800');
+  hideViewerError();
+  setActiveButton(key, btnEl);
+  highlightFloorplanPin(key);
 
   try {
-    currentViewer = pannellum.viewer('panorama-viewer', {
+    currentViewer.loadScene(key);
+  } catch (e) {
+    showViewerError('Failed to load scene.');
+  }
+}
+
+function createViewer(initialKey) {
+  if (!initialKey) return;
+
+  const config = {
+    default: {
+      firstScene: initialKey,
+      autoLoad: true,
+      autoRotate: autoRotateOn ? -2 : 0
+    },
+    scenes: {}
+  };
+
+  Object.entries(scenes).forEach(([key, scene]) => {
+    config.scenes[key] = {
       type: 'equirectangular',
       panorama: scene.url,
-      autoLoad: true,
-      autoRotate: autoRotateOn ? -2 : 0,
       hotSpots: prepareHotspots(key)
-    });
-    currentViewer.on('error', () => {
-      container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to load scene.</div>';
-    });
+    };
+  });
+
+  try {
+    currentViewer = pannellum.viewer('panorama-viewer', config);
   } catch (e) {
-    container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to initialize viewer.</div>';
+    showViewerError('Failed to initialize viewer.');
+    currentViewer = null;
+    return;
   }
 
-  highlightFloorplanPin(key);
+  currentViewer.on('scenechange', (sceneId) => {
+    setActiveButton(sceneId, buttonMap[sceneId]);
+    highlightFloorplanPin(sceneId);
+    hideViewerError();
+    if (autoRotateOn) {
+      currentViewer.startAutoRotate(-2);
+    } else {
+      currentViewer.stopAutoRotate();
+    }
+  });
+
+  currentViewer.on('load', () => {
+    hideViewerError();
+  });
+
+  currentViewer.on('error', () => {
+    showViewerError('Failed to load scene.');
+  });
+
+  setActiveButton(initialKey, buttonMap[initialKey]);
+  highlightFloorplanPin(initialKey);
 }
 
 function highlightFloorplanPin(sceneKey) {
@@ -206,11 +260,14 @@ function setupControls() {
 
 window.addEventListener('DOMContentLoaded', () => {
   buildButtons();
-  setupControls();
   buildFloorplanPins();
-  // load first scene by default
+
   const firstKey = Object.keys(scenes)[0];
-  if (firstKey) loadScene(firstKey, buttonMap[firstKey]);
+  if (firstKey) {
+    createViewer(firstKey);
+  }
+
+  setupControls();
 
   const btnFloorplan = document.getElementById('btn-floorplan');
   const fp = document.getElementById('floorplan');
