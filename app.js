@@ -21,7 +21,7 @@ function buildButtons() {
     if (views.length === 1) {
       const { key } = views[0];
       const b = document.createElement('button');
-      b.className = 'px-3 py-1.5 text-white text-sm font-semibold hover:bg-black/60 transition-colors whitespace-nowrap';
+      b.className = 'px-3 py-1.5 text-white text-xs md:text-sm font-semibold hover:bg-black/60 transition-colors whitespace-nowrap';
       b.textContent = groupName;
       b.addEventListener('click', () => loadScene(key, b));
       buttonsContainer.appendChild(b);
@@ -31,7 +31,7 @@ function buildButtons() {
       wrapper.className = 'relative';
 
       const mainBtn = document.createElement('button');
-      mainBtn.className = 'px-3 py-1.5 text-white text-sm font-semibold hover:bg-black/60 transition-colors whitespace-nowrap';
+      mainBtn.className = 'px-3 py-1.5 text-white text-xs md:text-sm font-semibold hover:bg-black/60 transition-colors whitespace-nowrap';
       mainBtn.textContent = groupName;
       wrapper.appendChild(mainBtn);
 
@@ -40,7 +40,7 @@ function buildButtons() {
 
       views.forEach(({ key, title }) => {
         const item = document.createElement('button');
-        item.className = 'px-4 py-2 text-white text-sm hover:bg-black/60 whitespace-nowrap text-left';
+        item.className = 'px-4 py-2 text-white text-xs md:text-sm hover:bg-black/60 whitespace-nowrap text-left';
         item.textContent = title;
         item.addEventListener('click', (e) => {
           e.stopPropagation();
