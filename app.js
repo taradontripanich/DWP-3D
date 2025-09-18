@@ -133,13 +133,28 @@ function loadScene(key, btnEl) {
   btnEl?.classList.remove('hover:bg-black/60');
   btnEl?.classList.add('bg-red-700','hover:bg-red-800');
 
+  const hotSpots = (scene.hotspots || []).map((hs) => {
+    if (hs.type === 'scene' && hs.sceneId) {
+      const targetKey = hs.target || hs.sceneId;
+      return {
+        ...hs,
+        type: 'info',
+        clickHandlerFunc: () => {
+          const targetButton = buttonMap[targetKey];
+          loadScene(targetKey, targetButton);
+        }
+      };
+    }
+    return hs;
+  });
+
   try {
     currentViewer = pannellum.viewer('panorama-viewer', {
       type: 'equirectangular',
       panorama: scene.url,
       autoLoad: true,
       autoRotate: autoRotateOn ? -2 : 0,
-      hotSpots: scene.hotspots || []
+      hotSpots
     });
     currentViewer.on('error', () => {
       container.innerHTML = '<div class="flex items-center justify-center h-full text-red-500">Failed to load scene.</div>';
