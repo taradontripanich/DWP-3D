@@ -16,7 +16,7 @@ window.SCENES = {
         target: 'livdin_v2',
         pitch: -10,
         yaw: -20,
-        text: "Artist's Corner",
+        text: "Nook Corner",
         cssClass: 'hs-dot'
       },
       {
@@ -31,7 +31,7 @@ window.SCENES = {
   },
   livdin_v2: {
     group: "Living Room & Dining",
-    title: "Artist's Corner",
+    title: "Nook Corner",
     url: "assets/images/Living_Room-View2.jpg",
     floorplan: {
       x: 70,
@@ -78,7 +78,7 @@ window.SCENES = {
         sceneId: 'livdin_v2',
         pitch: 0,
         yaw: 45,
-        text: "Artist's Corner",
+        text: "Nook Corner",
         cssClass: 'hs-dot'
       }
     ]
